@@ -2,6 +2,7 @@
 简介  :  通过项目https://github.com/mart1nro/joycontrol ,使用蓝牙模拟switch手柄，用于宝可梦剑盾的自动化上.
 
 运行平台  :  ubuntu16          蓝牙5.48
+
 运行环境  :  python 3.6.9
 
 1、快速开始
@@ -10,9 +11,7 @@
 
 (2)打开终端,进入项目目录,运行命令:
 
-    sudo python start.py -date [switch上设置的日期]    
-                                            或者     
-    sudo python3 start.py  -date [switch上设置的日期]
+    sudo python3 start.py -date [switch上设置的日期]    
 
     例:          sudo python3 start.py -date 2020-3-4
 
@@ -24,8 +23,9 @@
 
 (2)使用文件第60行按键模块定义脚本任务
     async def press_key(buttons_, release_sec_ = 0.05, delay_sec_ = 0.0, cycle_nums_ = 1)
-    例如:
-    await self.press_key('a', 0.05, 0.1, 1)
+    
+    例:         await self.press_key('a', 0.05, 0.1, 1)
+
     switch执行按下a键在0.05s后释放a键，然后延时0.1s，只执行一次操作
     
 (3)将自定义的脚本任务添入文件第52行的fun_list中(可选)
