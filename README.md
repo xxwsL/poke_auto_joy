@@ -13,7 +13,7 @@
     或者     
     sudo python3 start.py  -date (switch上设置的日期), 
     例如:
-    sudo python3 start.py -date 2020.3.4
+    sudo python3 start.py -date 2020-3-4
 
 3)通过在终端使用键盘按键w,s选择任务，选择任务后按键a开始任务
 

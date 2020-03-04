@@ -16,7 +16,7 @@ import auto_joy
 logger = logging.getLogger(__name__)
 
 
-async def _main(controller, capture_file=None, spi_flash=None):
+async def _main(controller, date_list, capture_file=None, spi_flash=None):
     factory = controller_protocol_factory(controller, spi_flash=spi_flash)
     transport, protocol = await create_hid_server(factory, 17, 19, capture_file=capture_file)
     
@@ -25,8 +25,8 @@ async def _main(controller, capture_file=None, spi_flash=None):
         if await dr.connect():
             print("蓝牙连接成功......")
             break
-
-    mAutoJoy = auto_joy.AutoJoy (dr, 2020, 3, 3)
+    
+    mAutoJoy = auto_joy.AutoJoy (dr, date_list[0], date_list[1], date_list[2])
     await mAutoJoy.run()
 
 
@@ -70,6 +70,10 @@ if __name__ == '__main__':
         else:
             yield None
 
+    date_list = args.date.split('-', 2)
+    date_list_num = []
+    date_list_num.extend([int(date_list[0]), int(date_list[1]), int(date_list[2])])
+    print(date_list_num)
     with get_output(args.log) as capture_file:
         loop = asyncio.get_event_loop()
-        loop.run_until_complete(_main(controller, capture_file=capture_file, spi_flash=spi_flash))
+        loop.run_until_complete(_main(controller, date_list_num, capture_file=capture_file, spi_flash=spi_flash))

@@ -179,12 +179,12 @@ class AutoJoy:
                     task_index = len(task_list) - 1
                 else:
                     task_index = task_index - 1
-                print(('当前任务 >> %d周期-%s' %(task_list[task_index][1], task_list[task_index][0]))
+                print('当前任务 >> %d周期-%s' %(task_list[task_index][1], task_list[task_index][0]))
             elif mRk_val == 's':
                 task_index = task_index + 1
                 if task_index == len(task_list) :
                     task_index = 0
-                print(('当前任务 >> %d周期-%s' %(task_list[task_index][1], task_list[task_index][0]))
+                print('当前任务 >> %d周期-%s' %(task_list[task_index][1], task_list[task_index][0]))
             elif mRk_val == 'a':
                 self.bStop =  bool(1 - self.bStop)
             elif mRk_val == 'e':
