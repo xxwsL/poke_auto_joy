@@ -8,12 +8,12 @@
 
 1)打开switch的手柄界面,进入手柄搜索模式.
 
-2)打开终端,进入项目目录,运行命令   
+2)打开终端,进入项目目录,运行命令:
     sudo python start.py -date (switch上设置的日期)    
-    或者     
-    sudo python3 start.py  -date (switch上设置的日期), 
-    例如:
-    sudo python3 start.py -date 2020-3-4
+                                            或者     
+    sudo python3 start.py  -date (switch上设置的日期)
+
+    例:          sudo python3 start.py -date 2020-3-4
 
 3)通过在终端使用键盘按键w,s选择任务，选择任务后按键a开始任务
 
