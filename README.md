@@ -19,9 +19,10 @@
 
 2、自定义任务
 
-(1)修改根目录下的auto_joy.py文件的内容(下列所提及的文件均指代auot_joy.py)
+(1)修改根目录下的auto_joy.py文件的内容(下列所提及的文件均指auot_joy.py)
 
-(2)使用文件第60行按键模块定义脚本任务
+(2)使用文件第60行按键模块定义脚本任务:
+
     async def press_key(buttons_, release_sec_ = 0.05, delay_sec_ = 0.0, cycle_nums_ = 1)
     
     例:         await self.press_key('a', 0.05, 0.1, 1)
@@ -32,5 +33,5 @@
 
 (4)在文件第17行添加要运行的任务，可通过键盘按键w,s选择任务
 
-# Resources
+# 引用
 [joycontrol](https://github.com/mart1nro/joycontrol)
