@@ -115,36 +115,36 @@ class AutoJoy:
 
     # switch home界面到时间设置界面操作模块
     async def home_to_set_time(self):
-        await self.press_key('down', dHighSp, dHighDl)
-        await self.press_key('right', dHighSp, dHighDl, 4)
+        await self.press_key('down', dHighSp, dFastDl)
+        await self.press_key('right', dHighSp, dFastDl, 4)
         await self.press_key('a', dHighSp, 0.2)
-        await self.press_key('down', 1.8, dHighDl)
-        await self.press_key('right', dHighSp, dHighDl)
-        await self.press_key('down', dHighSp, dHighDl, 4)
+        await self.press_key('down', 1.8, dFastDl)
+        await self.press_key('right', dHighSp, dFastDl)
+        await self.press_key('down', dHighSp, dFastDl, 4)
         await self.press_key('a', dHighSp, dFastDl)
-        await self.press_key('down', dHighSp, dHighDl, 2)
-        await self.press_key('a', dHighSp, dHighDl)
+        await self.press_key('down', dHighSp, dFastDl, 2)
+        await self.press_key('a', dHighSp, dFastDl)
 
     # 以向右的方式过帧
     async def pass_frame_right(self):
         time_index = self.time_flow_right()
         if time_index == 2:
-            await self.press_key('right', dHighSp, dHighDl, 2)
-            await self.press_key('up', dHighSp, dHighDl)
+            await self.press_key('right', dHighSp, dFastDl, 2)
+            await self.press_key('up', dHighSp, dFastDl)
         elif time_index == 1:
-            await self.press_key('right', dHighSp, dHighDl)
-            await self.press_key('right', dHighSp, dHighDl)
-            await self.press_key('up', dHighSp, dHighDl)
-            await self.press_key('left', dHighSp, dHighDl)
-            await self.press_key('up', dHighSp, dHighDl)
-            await self.press_key('right', dHighSp, dHighDl)
+            await self.press_key('right', dHighSp, dFastDl)
+            await self.press_key('right', dHighSp, dFastDl)
+            await self.press_key('up', dHighSp, dFastDl)
+            await self.press_key('left', dHighSp, dFastDl)
+            await self.press_key('up', dHighSp, dFastDl)
+            await self.press_key('right', dHighSp, dFastDl)
         else:
-            await self.press_key('up', dHighSp, dHighDl)
-            await self.press_key('right', dHighSp, dHighDl)
-            await self.press_key('up', dHighSp, dHighDl)
-            await self.press_key('right', dHighSp, dHighDl)
-            await self.press_key('up', dHighSp, dHighDl)
-        await self.press_key('a', dHighSp, dHighDl, 4)
+            await self.press_key('up', dHighSp, dFastDl)
+            await self.press_key('right', dHighSp, dFastDl)
+            await self.press_key('up', dHighSp, dFastDl)
+            await self.press_key('right', dHighSp, dFastDl)
+            await self.press_key('up', dHighSp, dFastDl)
+        await self.press_key('a', dHighSp, dFastDl, 4)
 
     # 自动任务
     async def auto_task(self, task_name_, cycle_nums_=1, before=None):
