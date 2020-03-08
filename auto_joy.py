@@ -70,12 +70,13 @@ class AutoJoy:
     '''
 
     async def press_key(self, buttons_, release_sec_=0.05, delay_sec_=0.0, cycle_nums_=1):
-        print('>pass button: %s, cycle_nums:%d' %(buttons_,cycle_nums_))
+        print('>pass button: %s, cycle_nums:%d' % (buttons_, cycle_nums_))
         for i in range(cycle_nums_):
             while self.bPause:
                 print('running pause.....')
             await button_push(self.dr_, buttons_, sec=release_sec_)
-            await asyncio.sleep(0.06)
+            delay = 0.06 if delay_sec_ == 0.0 else delay_sec_
+            await asyncio.sleep(delay)
         await asyncio.sleep(delay_sec_)
 
     # 摇杆动作
@@ -149,10 +150,10 @@ class AutoJoy:
     # 自动任务
     async def auto_task(self, task_name_, cycle_nums_=1, before=None):
         if before is not None:
-            print('--- run before: %s ---' %(before))
+            print('--- run before: %s ---' % (before))
             await self.fun_list[before]()
         fun = self.fun_list[task_name_]
-        print('--- run task: %s, times: %d---' % (task_name_,cycle_nums_))
+        print('--- run task: %s, times: %d---' % (task_name_, cycle_nums_))
         if cycle_nums_ < 0:
             while 1:
                 mRk_val = rk.getKey()
