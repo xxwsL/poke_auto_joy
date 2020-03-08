@@ -8,7 +8,7 @@ from joycontrol.controller import Controller
 from joycontrol.controller_state import ControllerState
 from joycontrol.memory import FlashMemory
 from joycontrol.report import OutputReport, SubCommand, InputReport, OutputReportID
-
+from ww import f
 logger = logging.getLogger(__name__)
 
 
@@ -102,7 +102,7 @@ class ControllerProtocol(BaseProtocol):
                     if output_report_id == OutputReportID.SUB_COMMAND:
                         reply_send = await self._reply_to_sub_command(report)
                 except ValueError as v_err:
-                    logger.warning(f'Report parsing error "{v_err}" - IGNORE')
+                    logger.warning(f('Report parsing error "{v_err}" - IGNORE'))
                 except NotImplementedError as err:
                     logger.warning(err)
 
@@ -120,7 +120,7 @@ class ControllerProtocol(BaseProtocol):
         try:
             report = OutputReport(list(data))
         except ValueError as v_err:
-            logger.warning(f'Report parsing error "{v_err}" - IGNORE')
+            logger.warning(f('Report parsing error "{v_err}" - IGNORE'))
             return
 
         try:
@@ -134,7 +134,7 @@ class ControllerProtocol(BaseProtocol):
         #elif output_report_id == OutputReportID.RUMBLE_ONLY:
         #    pass
         else:
-            logger.warning(f'Output report {output_report_id} not implemented - ignoring')
+            logger.warning(f('Output report {output_report_id} not implemented - ignoring'))
 
     async def _reply_to_sub_command(self, report):
         # classify sub command
@@ -147,7 +147,7 @@ class ControllerProtocol(BaseProtocol):
         if sub_command is None:
             raise ValueError('Received output report does not contain a sub command')
 
-        logging.info(f'received output report - Sub command {sub_command}')
+        logging.info(f('received output report - Sub command {sub_command}'))
 
         sub_command_data = report.get_sub_command_data()
         assert sub_command_data is not None
@@ -184,10 +184,10 @@ class ControllerProtocol(BaseProtocol):
             elif sub_command == SubCommand.SET_PLAYER_LIGHTS:
                 await self._command_set_player_lights(sub_command_data)
             else:
-                logger.warning(f'Sub command 0x{sub_command.value:02x} not implemented - ignoring')
+                logger.warning(f('Sub command 0x{sub_command.value:02x} not implemented - ignoring'))
                 return False
         except Exception as err:
-            logger.error(f'Failed to answer {sub_command} - {err}')
+            logger.error(f('Failed to answer {sub_command} - {err}'))
             return False
         return True
 
@@ -271,7 +271,7 @@ class ControllerProtocol(BaseProtocol):
 
                 self._0x30_input_report_sender.add_done_callback(callback)
         else:
-            logger.error(f'input report mode {sub_command_data[0]} not implemented - ignoring request')
+            logger.error(f('input report mode {sub_command_data[0]} not implemented - ignoring request'))
 
     async def _command_trigger_buttons_elapsed_time(self, sub_command_data):
         input_report = InputReport()
@@ -340,8 +340,7 @@ class ControllerProtocol(BaseProtocol):
             input_report.set_ack(0x80)
             input_report.reply_to_subcommand_id(SubCommand.SET_NFC_IR_MCU_STATE.value)
         else:
-            raise NotImplementedError(f'Argument {sub_command_data[0]} of {SubCommand.SET_NFC_IR_MCU_STATE} '
-                                      f'not implemented.')
+            raise NotImplementedError(f('Argument {sub_command_data[0]} of {SubCommand.SET_NFC_IR_MCU_STATE} not implemented.'))
 
         await self.write(input_report)
 

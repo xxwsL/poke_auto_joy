@@ -1,11 +1,11 @@
-
+from ww import f
 class FlashMemory:
     def __init__(self, spi_flash_memory_data=None, size=0x80000):
         if spi_flash_memory_data is None:
             self.data = size * [0x00]
         else:
             if len(spi_flash_memory_data) != size:
-                raise ValueError(f'Given data size {len(spi_flash_memory_data)} does not match size {size}.')
+                raise ValueError(f('Given data size {len(spi_flash_memory_data)} does not match size {size}.'))
             if isinstance(spi_flash_memory_data, bytes):
                 spi_flash_memory_data = list(spi_flash_memory_data)
             self.data = spi_flash_memory_data

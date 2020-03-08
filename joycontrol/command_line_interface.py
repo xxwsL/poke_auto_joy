@@ -1,6 +1,6 @@
 import inspect
 import logging
-
+from ww import f
 from aioconsole import ainput
 
 from joycontrol.controller_state import button_push, ControllerState
@@ -37,24 +37,24 @@ class ControllerCLI:
             stick.set_right()
         elif direction in ('h', 'horizontal'):
             if value is None:
-                raise ValueError(f'Missing value')
+                raise ValueError(f('Missing value'))
             try:
                 val = int(value)
             except ValueError:
-                raise ValueError(f'Unexpected stick value "{value}"')
+                raise ValueError(f('Unexpected stick value "{value}"'))
             stick.set_h(val)
         elif direction in ('v', 'vertical'):
             if value is None:
-                raise ValueError(f'Missing value')
+                raise ValueError(f('Missing value'))
             try:
                 val = int(value)
             except ValueError:
-                raise ValueError(f'Unexpected stick value "{value}"')
+                raise ValueError(f('Unexpected stick value "{value}"'))
             stick.set_v(val)
         else:
-            raise ValueError(f'Unexpected argument "{direction}"')
+            raise ValueError(f('Unexpected argument "{direction}"'))
 
-        return f'{stick.__class__.__name__} was set to ({stick.get_h()}, {stick.get_v()}).'
+        return f('{stick.__class__.__name__} was set to ({stick.get_h()}, {stick.get_v()}).')
 
     async def cmd_stick(self, side, direction, value=None):
         """
@@ -75,7 +75,7 @@ class ControllerCLI:
 
     def add_command(self, name, command):
         if name in self.commands:
-            raise ValueError(f'Command {name} already registered.')
+            raise ValueError(f('Command {name} already registered.'))
         self.commands[name] = command
 
     async def run(self):
@@ -94,9 +94,9 @@ class ControllerCLI:
 
                 available_buttons = self.controller_state.button_state.get_available_buttons()
 
-                if hasattr(self, f'cmd_{cmd}'):
+                if hasattr(self, f('cmd_{cmd}')):
                     try:
-                        result = await getattr(self, f'cmd_{cmd}')(*args)
+                        result = await getattr(self, f('cmd_{cmd}'))(*args)
                         if result:
                             print(result)
                     except Exception as e:

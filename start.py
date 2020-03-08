@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 import argparse
 import asyncio
 import logging
@@ -23,7 +24,7 @@ async def _main(controller, date_list, capture_file=None, spi_flash=None):
     dr = protocol.get_controller_state()
     while 1:
         if await dr.connect():
-            print("蓝牙连接成功......")
+            print("connection success......")
             break
     
     mAutoJoy = auto_joy.AutoJoy (dr, date_list[0], date_list[1], date_list[2])
