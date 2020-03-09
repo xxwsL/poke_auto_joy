@@ -1,6 +1,6 @@
 import logging
 import uuid
-
+from ww import f
 import dbus
 
 from joycontrol import utils
@@ -29,12 +29,12 @@ class HidDevice:
         """
         :param cls: default 0x002508 (Gamepad/joystick device class)
         """
-        logger.info(f'setting device class to {cls}...')
-        await utils.run_system_command(f'hciconfig hci0 class {cls}')
+        logger.info(f('setting device class to {cls}...'))
+        await utils.run_system_command(f('hciconfig hci0 class {cls}'))
 
     async def set_name(self, name: str):
-        logger.info(f'setting device name to {name}...')
-        await utils.run_system_command(f'hciconfig hci0 name "{name}"')
+        logger.info(f('setting device name to {name}...'))
+        await utils.run_system_command(f('hciconfig hci0 name "{name}"'))
 
     def register_sdp_record(self, record_path):
         with open(record_path) as record:

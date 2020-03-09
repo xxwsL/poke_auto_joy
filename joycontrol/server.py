@@ -3,7 +3,7 @@ import logging
 import socket
 
 import pkg_resources
-
+from ww import f
 from joycontrol import utils
 from joycontrol.device import HidDevice
 from joycontrol.report import InputReport
@@ -52,9 +52,9 @@ async def create_hid_server(protocol_factory, ctl_psm, itr_psm, capture_file=Non
 
     loop = asyncio.get_event_loop()
     client_ctl, ctl_address = await loop.sock_accept(ctl_sock)
-    logger.info(f'Accepted connection at psm {ctl_psm} from {ctl_address}')
+    logger.info(f('Accepted connection at psm {ctl_psm} from {ctl_address}'))
     client_itr, itr_address = await loop.sock_accept(itr_sock)
-    logger.info(f'Accepted connection at psm {itr_psm} from {itr_address}')
+    logger.info(f('Accepted connection at psm {itr_psm} from {itr_address}'))
     assert ctl_address[0] == itr_address[0]
 
     transport = L2CAP_Transport(asyncio.get_event_loop(), protocol, client_itr, 50, capture_file=capture_file)

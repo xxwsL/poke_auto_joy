@@ -1,9 +1,12 @@
 # poke_auto_joy
+
+本分支为支持树莓派3b+,ubuntu-mate 16.04,python3.5的修改分支
+
 简介  :  通过项目https://github.com/mart1nro/joycontrol ,使用蓝牙模拟switch手柄，用于宝可梦剑盾的自动化上.
 
-运行平台  :  ubuntu16          蓝牙5.48
+运行平台  :  ubuntu-mate 16.04    
 
-运行环境  :  python 3.6.9
+运行环境  :  python 3.5
 
 1、快速开始
 
@@ -15,7 +18,7 @@
 
     例:          sudo python3 start.py -date 2020-3-4
 
-(3)通过在终端使用键盘按键w,s选择任务，选择任务后按键a开始任务
+(3)通过在终端使用键盘按键w,s选择任务;a,d加减次数;q退出;选择任务后按键r开始任务
 
 2、自定义任务
 

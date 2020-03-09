@@ -1,9 +1,10 @@
+# -*- coding: UTF-8 -*-
 import argparse
 import asyncio
 import logging
 import os
 from contextlib import contextmanager
-
+from ww import f
 from joycontrol import logging_default as log
 from joycontrol.command_line_interface import ControllerCLI
 from joycontrol.controller import Controller
@@ -49,7 +50,7 @@ if __name__ == '__main__':
     elif args.controller == 'PRO_CONTROLLER':
         controller = Controller.PRO_CONTROLLER
     else:
-        raise ValueError(f'Unknown controller "{args.controller}".')
+        raise ValueError(f('Unknown controller "{args.controller}".'))
 
     spi_flash = None
     if args.spi_flash:

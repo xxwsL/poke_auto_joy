@@ -1,9 +1,10 @@
+# -*- coding: UTF-8 -*-
 import argparse
 import asyncio
 import logging
 import os
 from contextlib import suppress
-
+from ww import f
 import hid
 
 from joycontrol import logging_default as log
@@ -115,7 +116,7 @@ class DataReader:
             # notify spi request sender that the data is received
             self.pending_request[2].set()
 
-            logger.info(f'received offset {offset}, size {size} - {spi_data}')
+            logger.info(f('received offset {offset}, size {size} - {spi_data}'))
 
             # write data to file
             if output_file is not None:
@@ -157,7 +158,7 @@ async def _main(args, loop):
         else:
             await asyncio.sleep(2)
 
-    logger.info(f'Found controller "{controller}".')
+    logger.info(f('Found controller "{controller}".'))
 
     if args.output:
         with open(args.output, 'wb') as output:

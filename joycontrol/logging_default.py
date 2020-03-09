@@ -1,6 +1,6 @@
 import logging
 import datetime
-
+from ww import f
 
 def configure(console_level=logging.DEBUG, file_level=logging.DEBUG, logfile_name=None):
     """
@@ -28,7 +28,7 @@ def configure(console_level=logging.DEBUG, file_level=logging.DEBUG, logfile_nam
     # create file logger
     if logfile_name is not None:
         today = datetime.datetime.now()
-        name_of_file = today.strftime(f'%Y-%m-%d_%H-%M_{logfile_name}.log')
+        name_of_file = today.strftime(f('%Y-%m-%d_%H-%M_{logfile_name}.log'))
 
         file_handler = logging.FileHandler(name_of_file)
         file_handler.setLevel(file_level)
