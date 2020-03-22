@@ -16,28 +16,27 @@ class ControllerState:
 
         # create left stick state
         self.l_stick_state = self.r_stick_state = None
-        if controller in (Controller.PRO_CONTROLLER, Controller.JOYCON_L):
-            # load calibration data from memory
-            calibration = None
-            if spi_flash is not None:
-                calibration_data = spi_flash.get_user_l_stick_calibration()
-                if calibration_data is None:
-                    calibration_data = spi_flash.get_factory_l_stick_calibration()
-                calibration = LeftStickCalibration.from_bytes(calibration_data)
-
-            self.l_stick_state = StickState(calibration=calibration)
-
+        # if controller in (Controller.PRO_CONTROLLER, Controller.JOYCON_L):
+        #     # load calibration data from memory
+        #     calibration = None
+        #     if spi_flash is not None:
+        #         calibration_data = spi_flash.get_user_l_stick_calibration()
+        #         if calibration_data is None:
+        #             calibration_data = spi_flash.get_factory_l_stick_calibration()
+        #         calibration = LeftStickCalibration.from_bytes(calibration_data)
+        #     self.l_stick_state = StickState(calibration=calibration)
+        self.l_stick_state = StickState(0x07FF, 0x07FF, calibration = _StickCalibration(0x07FF, 0x07FF, 0x07FF, 0x07FF, 0x07FF, 0x07FF))
         # create right stick state
-        if controller in (Controller.PRO_CONTROLLER, Controller.JOYCON_R):
-            # load calibration data from memory
-            calibration = None
-            if spi_flash is not None:
-                calibration_data = spi_flash.get_user_r_stick_calibration()
-                if calibration_data is None:
-                    calibration_data = spi_flash.get_factory_r_stick_calibration()
-                calibration = RightStickCalibration.from_bytes(calibration_data)
-
-            self.r_stick_state = StickState(calibration=calibration)
+        # if controller in (Controller.PRO_CONTROLLER, Controller.JOYCON_R):
+        #     # load calibration data from memory
+        #     calibration = None
+        #     if spi_flash is not None:
+        #         calibration_data = spi_flash.get_user_r_stick_calibration()
+        #         if calibration_data is None:
+        #             calibration_data = spi_flash.get_factory_r_stick_calibration()
+        #         calibration = RightStickCalibration.from_bytes(calibration_data)
+        #     self.r_stick_state = StickState(calibration=calibration)
+        self.r_stick_state = StickState(0x07FF, 0x07FF, calibration = _StickCalibration(0x07FF, 0x07FF, 0x07FF, 0x07FF, 0x07FF, 0x07FF))
 
         self.sig_is_send = asyncio.Event()
 
@@ -263,62 +262,54 @@ class StickState:
     def get_v(self):
         return self._v_stick
     
-    def set_up_right(self):
-        if self._calibration is None:
-            raise ValueError('No calibration data available.')
-        self._h_stick = self._calibration.h_center + self._calibration.h_max_above_center
+    #设置摇杆左上
+    def set_left_up(self):
+        self._h_stick = self._calibration.h_center - self._calibration.h_max_below_center
         self._v_stick = self._calibration.v_center + self._calibration.v_max_above_center
 
+    #设置摇杆上
+    def set_up(self):
+        self._h_stick = self._calibration.h_center
+        self._v_stick = self._calibration.v_center + self._calibration.v_max_above_center
+    
+    #设置摇杆右上
+    def set_right_up(self):
+        self._h_stick = self._calibration.h_center +  self._calibration.h_max_above_center
+        self._v_stick = self._calibration.v_center + self._calibration.v_max_above_center
+    
+    #设置摇杆左
+    def set_left(self):
+        self._h_stick = self._calibration.h_center - self._calibration.h_max_below_center
+        self._v_stick = self._calibration.v_center
+
+    #设置摇杆中
     def set_center(self):
-        """
-        Sets stick to center position using the calibration data.
-        """
-        if self._calibration is None:
-            raise ValueError('No calibration data available.')
         self._h_stick = self._calibration.h_center
         self._v_stick = self._calibration.v_center
+    
+    #设置摇杆右
+    def set_right(self):
+        self._h_stick = self._calibration.h_center + self._calibration.h_max_above_center
+        self._v_stick = self._calibration.v_center
+    
+    #设置摇杆左下
+    def set_left_down(self):
+        self._h_stick = self._calibration.h_center - self._calibration.h_max_below_center
+        self._v_stick = self._calibration.v_center - self._calibration.v_max_below_center
+    
+    #设置摇杆下
+    def set_down(self):
+        self._h_stick = self._calibration.h_center
+        self._v_stick = self._calibration.v_center - self._calibration.v_max_below_center    
+    
+    #设置摇杆右下
+    def set_right_down(self):
+        self._h_stick = self._calibration.h_center + self._calibration.h_max_above_center
+        self._v_stick = self._calibration.v_center - self._calibration.v_max_below_center
 
     def is_center(self, radius=0):
         return self._calibration.h_center - radius <= self._h_stick <= self._calibration.h_center + radius and \
                self._calibration.v_center - radius <= self._v_stick <= self._calibration.v_center + radius
-
-    def set_up(self):
-        """
-        Sets stick to up position using the calibration data.
-        """
-        if self._calibration is None:
-            raise ValueError('No calibration data available.')
-        self._h_stick = self._calibration.h_center
-        self._v_stick = self._calibration.v_center + self._calibration.v_max_above_center
-
-    def set_down(self):
-        """
-        Sets stick to down position using the calibration data.
-        """
-        if self._calibration is None:
-            raise ValueError('No calibration data available.')
-        self._h_stick = self._calibration.h_center
-        self._v_stick = self._calibration.v_center - self._calibration.v_max_below_center
-
-    def set_left(self):
-        """
-        Sets stick to left position using the calibration data.
-        """
-        if self._calibration is None:
-            raise ValueError('No calibration data available.')
-        self._h_stick = self._calibration.h_center - self._calibration.h_max_below_center
-        self._v_stick = self._calibration.v_center
-
-    def set_right(self):
-        """
-        Sets stick to right position using the calibration data.
-        """
-        # if self._calibration is None:
-        #     raise ValueError('No calibration data available.')
-        # self._h_stick = self._calibration.h_center + self._calibration.h_max_above_center
-        # self._v_stick = self._calibration.v_center
-        self._h_stick =256
-        self._v_stick = 128
 
     def set_calibration(self, calibration):
         self._calibration = calibration
@@ -332,12 +323,11 @@ class StickState:
     def from_bytes(_3bytes):
         stick_h = _3bytes[0] | ((_3bytes[1] & 0xF) << 8)
         stick_v = (_3bytes[1] >> 4) | (_3bytes[2] << 4)
-
         return StickState(h=stick_h, v=stick_v)
 
     def __bytes__(self):
-        byte_1 = 0xFF & self._h_stick
-        byte_2 = (self._h_stick >> 8) | ((0xF & self._v_stick) << 4)
-        byte_3 = self._v_stick >> 4
-        assert all(0 <= byte <= 0xFF for byte in (byte_1, byte_2, byte_3))
+        byte_1 = self._h_stick & 0x00FF
+        byte_2 = ((self._h_stick & 0x0F00) >> 8) | (( self._v_stick & 0x000F) << 4)
+        byte_3 = (self._v_stick  & 0x0FF0) >> 4
+        # assert all(0 <= byte <= 0xFF for byte in (byte_1, byte_2, byte_3))
         return bytes((byte_1, byte_2, byte_3))

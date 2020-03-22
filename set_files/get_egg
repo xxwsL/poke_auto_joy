@@ -1,0 +1,12 @@
+def, task_cycle, 7
+def, egg_cycle, 8
+loop, task_cycle
+loop, egg_cycle
+l4, 1.65, 0.1, 1
+l6, 1.2, 0.1, 1
+l3, 0.8, 0.1, 1
+loop_end
+a, 0.05, 0.3, 3
+b, 0.05, 0.3, 17
+loop_end
+end

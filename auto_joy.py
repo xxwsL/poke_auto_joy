@@ -1,59 +1,62 @@
-
+import os,  sys  
 import calendar
 import asyncio
-from enum import Enum
+import time
 
 from joycontrol.controller_state import ControllerState,  button_push
 import real_key as rk
 
+sys.setrecursionlimit(1000000)
+
+task_file_name = ''
+task_cycles = 0
+stop_state = True
+pause_state = False
+shut_state = False
+
 dHighSp = 0.05
 dFastSp= 0.1
 
-dHighDl = 0.05
+dHighDl = 0.08
 dFastDl= 0.1
 
-#任务列表
-task_list = [
-    ['poke_ID_LuckyDraw', 1000 ],
-    ['poke_DigStone',  -1],
-    ['poke_BrushWatt',  640],
-    ['poke_pass_frame_left', 1000]
-]
+key_list = ['zl', 'zr', 'l', 'r', 'minus', 'plus',  'y', 'x', 'a', 'b', 'capture', 'home', 'up', 'left', 'right', 'down']
 
-class JoyDirect(Enum):
-    Center = 0
-    Up = 1
-    Down = 2
-    Left = 3
-    Right = 4
-    UpLeft = 5 
-    UpRight  = 6
-    DownLeft = 7
-    DownRight = 8 
+stick_l_list = [
+                            'l1', 'l2', 'l3',
+                             'l4', 'l5', 'l6',
+                            'l7', 'l8', 'l9',
+                            ]
 
+stick_r_list = [
+                            'r1', 'r2', 'r3',
+                            'r4', 'r5', 'r6',
+                            'r7', 'r8', 'r9',
+                            ]
+
+class switch_key_flag(int):
+    Key = 0
+    LStick = 1
+    RStick = 2
+    Loop = 3
+    Delay = 4
 
 class AutoJoy:
 
     def __init__(self, _dr,  _year, _month, _day):
-
-        self.bPause = False
-        self.bStop = True
-
-        self.key_ = ''
-
+        #switch控制设备
         self.dr_ = _dr
+        self.ing_state = False
 
+        #时间管理变量
         self.year_now_ = _year
         self.month_now_  = _month
         self.day_now = _day
-        self.all_days = calendar.monthrange(_year, _month)[1] 
+        self.all_days = calendar.monthrange(_year, _month)[1]
+        
+        #获取所有配置文件名列表
+        self.get_all_set_file('./set_files/')
 
-        self.fun_list = {
-            'poke_ID_LuckyDraw' : self.poke_ID_LuckyDraw, 
-            'poke_DigStone' : self.poke_DigStone,
-            'poke_BrushWatt' : self.poke_BrushWatt,
-            'poke_pass_frame_left' : self.poke_pass_frame_left
-        }
 
     '''
     switch按健功能
@@ -64,34 +67,93 @@ class AutoJoy:
     delay_sec_ : 本轮按键操作完毕延迟多长时间(单位:s)
     cycle_nums_ : 重复进行多少次当前按键操作
     '''
-    async def press_key(self, buttons_, release_sec_ = 0.05, delay_sec_ = 0.0, cycle_nums_ = 1):
-        print(buttons_)
-        for i in range(cycle_nums_):
-            while self.bPause:
-                    print('运行暂停中.....')
-            await button_push(self.dr_, buttons_, sec=release_sec_)     
-            await  asyncio.sleep(0.06)
-        await  asyncio.sleep(delay_sec_)
-
-    #摇杆动作
-    async def stick_l_action(self, direct_, release_sec_ = 0.05, delay_sec_ = 0.0 ):
-        if direct_ == JoyDirect.Center:
-            self.dr_.l_stick_state.set_center()
-        elif direct_ == JoyDirect.Up:
-            self.dr_.l_stick_state.set_up()
-        elif direct_ ==  JoyDirect.Down:
-            self.dr_.l_stick_state.set_down()
-        elif direct_ == JoyDirect.Left:
-            self.dr_.l_stick_state.set_left()
-        elif direct_ == JoyDirect.Right:
-            self.dr_.l_stick_state.set_right()
-        elif direct_ == JoyDirect.UpRight:
-            self.dr_.l_stick_state.set_up_right()
-
+    async def press_key(self, buttons_, release_sec_ = 0.05, delay_sec_=0.0):
+        # print(buttons_)
+        #发送按键
+        self.dr_.button_state.set_button(buttons_)
         await self.dr_.send()
         await asyncio.sleep(release_sec_)
-        
 
+        self.dr_.button_state.set_button(buttons_, pushed = False,)
+        await self.dr_.send()
+        await asyncio.sleep(delay_sec_)
+
+    #左摇杆动作
+    async def stick_l_action(self, direct_, release_sec_=0.05, delay_sec_=0.0):
+        #左上
+        if direct_ == 'l1':
+            self.dr_.l_stick_state.set_left_up()
+        #上
+        elif direct_ == 'l2':
+            self.dr_.l_stick_state.set_up()
+        #右上
+        elif direct_ ==  'l3':
+            self.dr_.l_stick_state.set_right_up()
+        #左
+        elif direct_ == 'l4':
+            self.dr_.l_stick_state.set_left()
+        #中
+        elif direct_ == 'l5':
+            self.dr_.l_stick_state.set_center()
+        #右
+        elif direct_ == 'l6':
+            self.dr_.l_stick_state.set_right()
+        #左下
+        elif direct_ == 'l7':
+            self.dr_.l_stick_state.set_left_down()
+        #下
+        elif direct_ == 'l8':
+            self.dr_.l_stick_state.set_down()
+        #右下
+        elif direct_ == 'l9':
+            self.dr_.l_stick_state.set_right_down()
+
+        #开始摇杆
+        await self.dr_.send()
+        await asyncio.sleep(release_sec_)
+        #释放摇杆
+        self.dr_.l_stick_state.set_center()
+        await self.dr_.send()
+        await asyncio.sleep(delay_sec_)
+   
+   #右摇杆动作
+    async def stick_r_action(self, direct_, release_sec_=0.05, delay_sec_=0.0):
+        #左上
+        if direct_ == 'r1':
+            self.dr_.r_stick_state.set_left_up()
+        #上
+        elif direct_ == 'r2':
+            self.dr_r_stick_state.set_up()
+        #右上
+        elif direct_ ==  'r3':
+            self.dr_.r_stick_state.set_right_up()
+        #左
+        elif direct_ == 'r4':
+            self.dr_.r_stick_state.set_left()
+        #中
+        elif direct_ == 'r5':
+            self.dr_.r_stick_state.set_center()
+        #右
+        elif direct_ == 'r6':
+            self.dr_.r_stick_state.set_right()
+        #左下
+        elif direct_ == 'r7':
+            self.dr_.r_stick_state.set_left_down()
+        #下
+        elif direct_ == 'r8':
+            self.dr_.r_stick_state.set_down()
+        #右下
+        elif direct_ == 'r9':
+            self.dr_.r_stick_state.set_right_down()
+
+        #开始摇杆
+        await self.dr_.send()
+        await asyncio.sleep(release_sec_)
+        #释放摇杆
+        self.dr_.r_stick_state.set_center()
+        await self.dr_.send()
+        await asyncio.sleep(delay_sec_)
+        
     #过帧时需要使用时间流来监控时间
     def time_flow_right(self): 
         res = 2
@@ -109,178 +171,159 @@ class AutoJoy:
             self.day_now += 1
         return res
 
-    #switch home界面到时间设置界面操作模块
-    async def home_to_set_time(self):
-        await self.press_key('down', dHighSp, dHighDl)
-        await self.press_key( 'right', dHighSp, dHighDl, 4)
-        await self.press_key( 'a', dHighSp, 0.2)
-        await self.press_key('down', 1.8, dHighDl)
-        await self.press_key('right',dHighSp, dHighDl)
-        await self.press_key('down', dHighSp, dHighDl, 4)
-        await self.press_key('a', dHighSp, dHighDl)
-        await self.press_key('down', dHighSp, dHighDl, 2)
-        await self.press_key('a', dHighSp, dHighDl)
-
-    #以向右的方式过帧
-    async def pass_frame_right(self):
-        time_index = self.time_flow_right()
-        if time_index == 2:
-            await self.press_key( 'right', dHighSp, dHighDl, 2)
-            await self.press_key('up', dHighSp, dHighDl)
-        elif time_index == 1:
-            await self.press_key('right', dHighSp, dHighDl)
-            await self.press_key('right', dHighSp, dHighDl)
-            await self.press_key('up', dHighSp, dHighDl)
-            await self.press_key('left', dHighSp, dHighDl)
-            await self.press_key('up', dHighSp, dHighDl)
-            await self.press_key('right', dHighSp, dHighDl)
+    #判断当前代码字符属于那个操作flag
+    def parse_str_flag(self, str_):
+        if str_ in key_list:
+            return switch_key_flag.Key
+        elif str_ in stick_l_list:
+            return switch_key_flag.LStick
+        elif str_ in stick_r_list:
+            return switch_key_flag.RStick
         else:
-            await self.press_key('up', dHighSp, dHighDl)
-            await self.press_key('right', dHighSp, dHighDl)
-            await self.press_key('up', dHighSp, dHighDl)
-            await self.press_key( 'right', dHighSp, dHighDl)
-            await self.press_key( 'up', dHighSp, dHighDl)
-        await self.press_key('a', dHighSp, dHighDl, 4)
+            return -1
 
     #自动任务
-    async def auto_task(self,  task_name_, cycle_nums_=1):
-        fun = self.fun_list[task_name_]
+    async def auto_task(self, task_name_, cycle_nums_=1):
+        #解析配置文件数据
+        vecTask_data_t = self.parse_set_file(task_name_)
+        #无限循环任务
         if cycle_nums_ < 0:
             while 1:
-                mRk_val = rk.getKey()
-                if(mRk_val == 'a'):
-                    self.bStop == True
+                if stop_state:
                     break
-                await fun()       
+                #执行任务
+                await self.task_parse(vecTask_data_t)
+        #按设定周期循环任务
         else:
             for i in range(cycle_nums_): 
-                mRk_val = rk.getKey()
-                if(mRk_val == 'a'):
-                    self.bStop == True
+                if stop_state:
                     break
-                await fun()  
+                #执行任务
+                await self.task_parse(vecTask_data_t)
+                print('完成 %d 周期......' %(i))
+
+    def cmd_len4(self, cmd_line_):
+        cmd_flag = self.parse_str_flag(cmd_line_[0])
+        if cmd_flag >= switch_key_flag.Key:
+            return [cmd_flag, cmd_line_[0], float(cmd_line_[1]), float(cmd_line_[2]), int(cmd_line_[3])]
+        else:
+            return []
+
+    #解析配置文件
+    def parse_set_file(self, task_name_):
+        #获取文本每一行
+        with open(self.strSet_root + task_name_, 'r') as rf:
+            self.line_datas = rf.readlines()
+            self.line_datas_len = len(self.line_datas)
+            self.task_str_index = 0
+            self.def_diect = {}
+            self.vecTask_data = self.parse_set_file_rec()
+        # print(self.vecTask_data)
+        return self.vecTask_data
+
+    def parse_set_file_rec(self):
+        vecTask_data_t = []
+        cmd_period = []
+        while self.task_str_index < self.line_datas_len:
+            vecCmd_data = self.line_datas[self.task_str_index].split(', ')
+            cmd_len = len(vecCmd_data)
+            #判断是否是一个有效命令
+            if cmd_len == 4:
+                cmd_len4_res = self.cmd_len4(vecCmd_data)
+                if cmd_len4_res != []:
+                    cmd_period.append(cmd_len4_res)
+                else:
+                    raise PermissionError('switch指令错误0!!!')
+            #判断是否是单命令
+            elif cmd_len == 1:
+                if (vecCmd_data[0] == 'end' or vecCmd_data[0] == 'end\n') and (cmd_period != []):
+                    vecTask_data_t.append(cmd_period)
+                    cmd_period = []
+                if (vecCmd_data[0] == 'loop_end' or vecCmd_data[0] == 'loop_end\n'):
+                    if cmd_period != []:
+                        vecTask_data_t.append(cmd_period)
+                    return vecTask_data_t
+                else:
+                    pass
+                    # print('switch指令警告-1 = %s' %(vecCmd_data[0] ))
+            #判断是否是双命令
+            elif cmd_len == 2:
+                if vecCmd_data[0] == 'loop':
+                    loop_cycle = self.str_decode_num(vecCmd_data[1])
+                    cmd_period_loop = [switch_key_flag.Loop, loop_cycle]
+                    self.task_str_index += 1
+                    cmd_period_loop.append(self.parse_set_file_rec())              
+                    cmd_period.append(cmd_period_loop)
+            elif cmd_len == 3:
+                if vecCmd_data[0] == 'def':
+                    self.def_diect[vecCmd_data[1] + '\n'] = int(vecCmd_data[2])
+            #命令文本遍历加1
+            self.task_str_index = self.task_str_index + 1
+        #返回解析得到的列表
+        return vecTask_data_t
+
+
+    def str_decode_num(self, str_):
+        if str_ in self.def_diect:
+            return self.def_diect[str_]
+        else:
+            return int(str_)
+
+    #任务解析
+    async def task_parse(self, str_task_list_):
+        for cmd_period in str_task_list_:
+            if await self.task_parse_run(cmd_period) == False:
+                break;
+                
     
+    async def task_parse_run(self,  cmd_period):
+        for cmd in cmd_period:
+            if stop_state:
+                return False
+            # print(cmd)
+            #执行按键操作
+            if cmd[0] == switch_key_flag.Key:
+                for i in range(cmd[4]):
+                    await self.press_key(cmd[1], cmd[2], cmd[3])
+            #执行左摇杆操作
+            elif cmd[0] == switch_key_flag.LStick:
+                for i in range(cmd[4]):
+                    await self.stick_l_action(cmd[1], cmd[2], cmd[3])
+            #执行右摇杆操作
+            elif cmd[0] == switch_key_flag.RStick:
+                for i in range(cmd[4]):
+                    await self.stick_r_action(cmd[1], cmd[2], cmd[3])
+            #循环指令
+            elif cmd[0]  == switch_key_flag.Loop:
+                for i in range(cmd[1]):
+                    await self.task_parse(cmd[2])
+            elif cmd[0] == switch_key_flag.Delay:
+                await asyncio.sleep(cmd[1])
+            else:
+                print(cmd[0])
+        return True
     '''
     运行
-    键盘按键w : 向上选择任务
-    键盘按键s  : 向下选择任务
-    键盘按键a : 开始或停止任务
-    键盘按键e : 退出程序
     '''
-    async def run(self):
-        await self.press_key('home', 0.1, 1)
+    async def run_in_gui(self):
+        await self.press_key('home', 0.1)
+        asyncio.sleep(1)
         print('开始运行......')
-        
-        task_index = 0
+        global stop_state
         while 1:
-            mRk_val = rk.getKey()
-            if mRk_val == 'w':
-                if task_index == 0 and len(task_list) > 1:
-                    task_index = len(task_list) - 1
-                else:
-                    task_index = task_index - 1
-                print('当前任务 >> %d周期-%s' %(task_list[task_index][1], task_list[task_index][0]))
-            elif mRk_val == 's':
-                task_index = task_index + 1
-                if task_index == len(task_list) :
-                    task_index = 0
-                print('当前任务 >> %d周期-%s' %(task_list[task_index][1], task_list[task_index][0]))
-            elif mRk_val == 'a':
-                self.bStop =  bool(1 - self.bStop)
-            elif mRk_val == 'e':
-                print('退出程序......')
-                break;
-            
-            if self.bStop == False:
-                # await self.stick_l_action(JoyDirect.Right, 5, 1)
-                # await self.task_list[2]
-                await self.auto_task(task_list[task_index][0], task_list[task_index][1])
-                self.bStop = True
+            if stop_state == False:
+                print('运行  %d  周期  %s  任务......' %(task_cycles,  task_file_name))
+                await self.auto_task(task_file_name, task_cycles)
+                stop_state = True
+                if shut_state:
+                    os.system('sudo shutdown')
+            await asyncio.sleep(0.1)
 
-#--------------------------------------------------------------------------------------------------#
+    #获取所有配置文件
+    def get_all_set_file(self, path_str_ = './set_files/'):
+        for root, dirs, files in os.walk(path_str_):
+            self.strSet_root = root + '/'
+            self.vecSet_files = files
+            print(files)
 
-    #ID抽奖
-    async def poke_ID_LuckyDraw(self):
-        #移动到时间设置界面
-        await self.home_to_set_time()
-        # #过帧
-        await  self.pass_frame_right()
-        #返回home界面，打开游戏
-        await  self.press_key('home', dHighSp, 1.1)
-        await  self.press_key('a', dHighSp,  0.65)
-        #返回人物界面
-        await  self.press_key('b', dHighSp,  0.1,  8)
-        # 打开宝可梦pc
-        await  self.press_key('a', 0.15, 0.3, 2)
-        # 选择ID抽奖
-        await  self.press_key( 'down', 0.3,  0.25)
-        # 无脑按a
-        await  self.press_key('a',  0.2,   0.3)
-        await  self.press_key( 'a',  0.1,   0.1,  15)
-        await  self.press_key('b',  0.1,   0.1,  15)
-        #返回home界面
-        await  self.press_key( 'home', dHighSp, 1.0)
-
-    #挖化石
-    async def poke_DigStone(self):
-        await  press_key('a',  dHighSp,  0.05,  50)
-
-    #刷瓦特
-    async def poke_BrushWatt(self): 
-        #移动到时间设置界面
-        await  self.home_to_set_time()
-        #过帧
-        await  self.pass_frame_right()
-        #返回home界面，打开游戏
-        # await press_key('home',  dHighSp,  1.1)
-        # await press_key( 'a', dHighSp,  0.65,  1)
-        # await press_key('b', dHighSp,  0.3 , 2)
-        # await press_key('a', dHighSp,  0.5)
-        # await press_key('b', dHighSp,  0.2, 12 )
-        await  self.press_key('home',  dHighSp,  0.8)
-
-    #向左过帧
-    async def poke_pass_frame_left(self):
-        await  self.press_key('a',  dHighSp, dHighDl)
-        await  self.press_key('left',  dHighSp, dHighDl, 3)
-        await  self.press_key('up',  dHighSp, dHighDl)
-        time_index = self.time_flow_right()
-        if time_index == 1:
-            await self.press_key('left', dHighSp,dHighDl)
-            await self.press_key('up', dHighSp, dHighDl)
-            await self.press_key('a', dHighSp, dHighDl)
-        elif time_index == 0:
-            await self.press_key('left', dHighSp, dHighDl)
-            await self.press_key('up', dHighSp, dHighDl)
-            await self.press_key('left', dHighSp, dHighDl)
-            await self.press_key('up', dHighSp, dHighDl)
-            await self.press_key('a', dHighSp,dHighDl, 2)
-        await self.press_key('a', dHighSp, dHighDl, 4)
-
-    async def poke_pass_frame_left_(self):
-        await  self.press_key('a',  dHighSp, dHighDl)
-        await  self.press_key('left',  dHighSp, dHighDl)
-        await  self.press_key('left',  dHighSp, dHighDl)
-        await  self.press_key('left',  dHighSp, dHighDl)
-        await  self.press_key('up',  dHighSp, dHighDl)
-        time_index = self.time_flow_right()
-        if time_index == 1:
-            await self.press_key('left', dHighSp,dHighDl)
-            await self.press_key('up', dHighSp, dHighDl)
-            await self.press_key('a', dHighSp, dHighDl)
-        elif time_index == 0:
-            await self.press_key('left', dHighSp, dHighDl)
-            await self.press_key('up', dHighSp, dHighDl)
-            await self.press_key('left', dHighSp, dHighDl)
-            await self.press_key('up', dHighSp, dHighDl)
-            await self.press_key('a', dHighSp,dHighDl)
-            await self.press_key('a', dHighSp,dHighDl)
-        await self.press_key('a', dHighSp, dHighDl)
-        await self.press_key('a', dHighSp, dHighDl)
-        await self.press_key('a', dHighSp, dHighDl)
-        await self.press_key('a', dHighSp, dHighDl)
-
-
-#--------------------------------------------------------------------------------------------------#
-
-
+    
