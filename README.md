@@ -23,13 +23,13 @@
    
    loop, 2
    
-   a, 0.1, 0.1, 1
+   a, 0.1, 0.2, 1
    
    loop_end
    
    end
    
-   按下按键0.1s释放,延时0.1s,执行此次操作1次,循环执行2次
+   按下按键0.1s释放,延时0.2s,执行此次操作1次,循环执行2次
 
 # 引用
 [joycontrol](https://github.com/mart1nro/joycontrol)
